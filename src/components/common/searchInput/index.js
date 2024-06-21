@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import { View, TouchableOpacity, Image, TextInput, Alert } from "react-native";
 import { icons } from "../../../constants";
 
-const SearchInput = ({ initialQuery, type }) => {
+const SearchInput = ({ initialQuery }) => {
   const navigation = useNavigation();
-  const route = useRoute();
+
   const [query, setQuery] = useState(initialQuery || "");
 
   return (
@@ -13,7 +13,7 @@ const SearchInput = ({ initialQuery, type }) => {
       <TextInput
         className="text-base mt-0.5 text-black-100 h-full flex-1 font-pregular"
         value={query}
-        placeholder={`Search foods, snacks, etc...`}
+        placeholder={`Search foods, restaurants, etc...`}
         placeholderTextColor="#2d2d2d"
         onChangeText={(e) => setQuery(e)}
       />
@@ -28,11 +28,7 @@ const SearchInput = ({ initialQuery, type }) => {
             );
           }
 
-          if (type === "event") {
-            navigation.navigate("EventSearch", { query: query.trim() });
-          } else {
-            navigation.navigate("Search", { query: query.trim() });
-          }
+          navigation.navigate("Search", { query: query.trim() });
         }}
       >
         <Image source={icons.search} className="w-5 h-5" resizeMode="contain" />

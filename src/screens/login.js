@@ -66,7 +66,7 @@ const Login = ({ navigation }) => {
     <ScreenLayout>
       <ScrollView>
         <View
-          className="w-full flex justify-center h-full px-4 my-6"
+          className="w-full flex justify-center h-full  my-6"
           style={{
             minHeight: Dimensions.get("window").height - 100,
           }}
@@ -78,7 +78,7 @@ const Login = ({ navigation }) => {
           />
 
           <Text className="text-2xl font-semibold text-black-200 mt-6 font-psemibold">
-            Log in to Newswave
+            Log in to Tastycrave
           </Text>
 
           <FormField

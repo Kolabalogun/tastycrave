@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "280184484139",
+    "project_id": "tastycrave-450c7",
+    "storage_bucket": "tastycrave-450c7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:280184484139:android:a3053a88094509446cd56e",
+        "android_client_info": {
+          "package_name": "com.ibrahimdevv.tastycrave"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDIdbmItReun1gLcd5ZUU4z2mFPFVu7G3E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

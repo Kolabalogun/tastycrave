@@ -11,11 +11,6 @@ const AdsBoard = () => {
             Welcome, you have 20% discount on all our product from now till next
             August.
           </Text>
-          <TouchableOpacity className="rounded-full p-1.5 items-center bg-white w-[120px] my-1">
-            <Text className="text-black-100  text-center font-pmedium">
-              Order Food Now
-            </Text>
-          </TouchableOpacity>
         </View>
         <View>
           <Image

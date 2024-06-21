@@ -7,7 +7,6 @@ import {
   Image,
   ActivityIndicator,
 } from "react-native";
-
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { icons } from "../../../constants";
 
@@ -39,15 +38,6 @@ const FormField = ({
           type ? "focus:border-[#511bb7] " : "focus:border-secondary"
         } flex flex-row justify-center items-center`}
       >
-        {title === "Entry Fee" && (
-          <View>
-            <Image
-              source={icons.naira}
-              className="w-5 h-5 mr-2 -mt-1"
-              resizeMode="contain"
-            />
-          </View>
-        )}
         <TextInput
           className="flex-1 text-black-200 h-full font-psemibold text-base"
           value={value}

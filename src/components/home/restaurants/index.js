@@ -1,22 +1,25 @@
-import { View, Text, TouchableOpacity, Image } from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
 import React from "react";
 
-import { config, getAllDocs } from "../../../lib/appwrite";
-import useAppwrite from "../../../lib/useAppwrite";
 import Card from "./card";
+import { useNavigation } from "@react-navigation/native";
 
-const Restaurants = () => {
-  const {
-    data: shops,
-    refetch,
-    loading,
-  } = useAppwrite(() => getAllDocs(5, config.shopsCollectionId));
+const Restaurants = ({ shops }) => {
+  const navigation = useNavigation();
 
   return (
-    <View className="my-4   ">
-      <View className="justify-between mb-6 flex-row items-center  ">
+    <View className="my-6   ">
+      <View className="justify-between mb-1 flex-row items-center  ">
         <Text className="font-semibold text-lg ">Nearby Restaurants</Text>
-        <TouchableOpacity className="font-semibold text-xs ">
+        <TouchableOpacity
+          onPress={() =>
+            navigation.navigate("Search", {
+              query: "All Restaurants",
+              type: "restaurants",
+            })
+          }
+          className="font-semibold text-xs "
+        >
           <Text className="font-pmedium text-secondary-200">See All</Text>
         </TouchableOpacity>
       </View>

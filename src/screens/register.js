@@ -22,6 +22,8 @@ import { createUser } from "..//lib/appwrite";
 import * as Notifications from "expo-notifications";
 import Constants from "expo-constants";
 import * as Device from "expo-device";
+import { useNavigation } from "@react-navigation/native";
+import { sendPushNotification } from "../lib/notification";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -78,7 +80,7 @@ export async function registerForPushNotificationsAsync() {
   return token;
 }
 
-const Register = () => {
+const Register = ({ navigation }) => {
   const { setUser, setIsLoggedIn, expoPushToken, storeData, setExpoPushToken } =
     useGlobalContext();
 
@@ -167,6 +169,13 @@ const Register = () => {
 
       Alert.alert("Success", "User signed in successfully");
 
+      const message = {
+        title: "Tastycrave",
+        body: "Welcome to Tastycrave! Delicious food delivered to your doorstep. 🛍😊",
+      };
+
+      await sendPushNotification([expoPushToken], message);
+
       navigation.navigate("Home");
     } catch (error) {
       console.log(error);
@@ -180,7 +189,7 @@ const Register = () => {
     <ScreenLayout>
       <ScrollView>
         <View
-          className="w-full flex justify-center h-full px-4 my-6"
+          className="w-full flex justify-center h-full   my-6"
           style={{
             minHeight: Dimensions.get("window").height - 100,
           }}
@@ -192,7 +201,7 @@ const Register = () => {
           />
 
           <Text className="text-2xl font-semibold text-black-200 mt-6 font-psemibold">
-            Sign Up to Newswave
+            Sign Up to Tastycrave
           </Text>
 
           <FormField

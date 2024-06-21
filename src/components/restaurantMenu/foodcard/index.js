@@ -9,11 +9,11 @@ const Card = ({ food }) => {
     <View>
       <TouchableOpacity
         onPress={() => {
-          navigation.navigate("Restaurant", {
+          navigation.navigate("FoodDetails", {
             food,
           });
         }}
-        className="flex flex-row   justify-between     "
+        className="flex flex-row   justify-between   mt-3  "
       >
         <View>
           <Image

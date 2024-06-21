@@ -1,29 +1,10 @@
-import { useNavigation } from "@react-navigation/native";
-import React, { useContext, useEffect, useReducer, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 
-import {
-  categoryData,
-  FoodMenu,
-  initialCurrentLocation,
-} from "../utils/dataarray";
-import { Reducers } from "./Reducers";
 import useAppwrite from "../lib/useAppwrite";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getAllUsers, getCurrentUser } from "../lib/appwrite";
+import { config, getAllDocs, getCurrentUser } from "../lib/appwrite";
 
 const AppContext = React.createContext();
-
-const initialState = {
-  FoodArray: FoodMenu,
-  foodList: FoodMenu,
-  categories: categoryData,
-  currentLocation: initialCurrentLocation,
-  selectedCategory: null,
-  dummycategory: FoodMenu,
-  total: 0,
-  navAmount: 0,
-  currentFood: 0,
-};
 
 const AppProvider = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(null);
@@ -35,7 +16,9 @@ const AppProvider = ({ children }) => {
 
   const [updateUser, setUpdateUser] = useState(true);
 
-  const { data: users, loading } = useAppwrite(getAllUsers);
+  const { data: users, loading } = useAppwrite(() =>
+    getAllDocs(40, config.userCollectionId)
+  );
 
   useEffect(() => {
     const getExpoIDs = () => {
@@ -89,33 +72,8 @@ const AppProvider = ({ children }) => {
     }
   };
 
-  const [state, dispatch] = useReducer(Reducers, initialState);
+  const [cart, setCart] = useState([]);
 
-  const [showCart, showCartF] = useState(false);
-
-  function toggleCart(params) {
-    showCartF(!showCart);
-  }
-
-  const handleSelectedCategory = (item) => {
-    dispatch({ type: "SELECTEDCATEGORY", payload: item });
-  };
-
-  const increment = (id) => {
-    dispatch({ type: "INCREASE", payload: id });
-  };
-  const decrement = (id) => {
-    dispatch({ type: "DECREASE", payload: id });
-  };
-  const handleCheckOut = () => {
-    dispatch({ type: "CHECKOUT" });
-  };
-
-  useEffect(() => {
-    dispatch({ type: "GETTOTAL" });
-  }, [state.foodList]);
-
-  const navigation = useNavigation();
   return (
     <AppContext.Provider
       value={{
@@ -126,15 +84,12 @@ const AppProvider = ({ children }) => {
         setUpdateUser,
         setIsLoggedIn,
         isLoggedIn,
-
-        ...state,
-        handleSelectedCategory,
-        increment,
-        toggleCart,
-        showCart,
-        decrement,
-        navigation,
-        handleCheckOut,
+        cart,
+        setCart,
+        checkCurrentUser,
+        setUser,
+        storeData,
+        isLoading,
       }}
     >
       {children}

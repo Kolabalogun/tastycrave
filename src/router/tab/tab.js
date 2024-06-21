@@ -8,20 +8,14 @@ import {
   MaterialCommunityIcons,
 } from "@expo/vector-icons";
 import Home from "../../screens/home";
-import { icons } from "../../constants";
+ 
 import { Text, View } from "react-native";
 import Profile from "../../screens/profile";
 import Checkout from "../../screens/checkout";
+import Cart from "../../screens/cart";
 
 const Tabs = createBottomTabNavigator();
-
-const tabs = [
-  { name: "home", icon: icons.home },
-  { name: "event", icon: icons.bookmark },
-  { name: "create", icon: icons.plus },
-  { name: "profile", icon: icons.profile },
-];
-
+ 
 const TabIcon = ({ icon, color, name, focused }) => {
   return (
     <View className="gap-2 py-3 items-center justify-center">
@@ -68,7 +62,7 @@ const TabNavigations = () => {
               icon={
                 <MaterialCommunityIcons
                   name="home-assistant"
-                  size={focused ? 30 : 26}
+                  size={focused ? 26 : 24}
                   color={focused ? "#ffa001" : "#c7c7c7"}
                 />
               }
@@ -78,11 +72,11 @@ const TabNavigations = () => {
       />
 
       <Tabs.Screen
-        name={"Checkout"}
-        component={Checkout}
+        name={"Cart"}
+        component={Cart}
         options={{
           tabBarActiveTintColor: "#ffa001",
-          title: "Checkout",
+          title: "Cart",
           tabBarIcon: ({ color, focused }) => (
             <TabIcon
               name={"Cart"}
@@ -91,7 +85,7 @@ const TabNavigations = () => {
               icon={
                 <FontAwesome6
                   name="cart-plus"
-                  size={focused ? 30 : 26}
+                  size={focused ? 26 : 24}
                   color={focused ? "#ffa001" : "#c7c7c7"}
                 />
               }
@@ -114,7 +108,7 @@ const TabNavigations = () => {
               icon={
                 <FontAwesome
                   name="user"
-                  size={focused ? 30 : 26}
+                  size={focused ? 26 : 24}
                   color={focused ? "#ffa001" : "#c7c7c7"}
                 />
               }

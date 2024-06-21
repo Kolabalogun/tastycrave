@@ -1,19 +1,11 @@
-import { Image, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import React from "react";
 
 import { ScrollView } from "react-native";
 
-import { config, getAllDocs } from "../../../lib/appwrite";
-import useAppwrite from "../../../lib/useAppwrite";
 import Card from "./card";
 
-const FoodCategory = () => {
-  const {
-    data: categories,
-    refetch,
-    loading,
-  } = useAppwrite(() => getAllDocs(null, config.categoriesCollectionId));
-
+const FoodCategory = ({ categories }) => {
   return (
     <View className="mb-2  ">
       <Text className="font-semibold text-lg pb-3">Choose Category</Text>

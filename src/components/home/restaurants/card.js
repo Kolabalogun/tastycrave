@@ -3,7 +3,7 @@ import React from "react";
 import { AntDesign } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 
-const Card = ({ shop }) => {
+const ShopCard = ({ shop }) => {
   const navigation = useNavigation();
   return (
     <View className="mt-4">
@@ -40,7 +40,7 @@ const Card = ({ shop }) => {
               </View>
             </View>
             <Text className="text-gray-400 font-pmedium text-xs">
-              {shop?.dishes} Dishes
+              {shop?.location}
             </Text>
           </View>
         </View>
@@ -50,4 +50,4 @@ const Card = ({ shop }) => {
   );
 };
 
-export default Card;
+export default ShopCard;

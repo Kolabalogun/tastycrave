@@ -1,9 +1,19 @@
 import { Image, Text, TouchableOpacity, View } from "react-native";
 import React from "react";
+import { useNavigation } from "@react-navigation/native";
 
 const Card = ({ category }) => {
+  const navigation = useNavigation();
   return (
-    <TouchableOpacity className="items-center space-y-2 mr-3">
+    <TouchableOpacity
+      onPress={() =>
+        navigation.navigate("Search", {
+          query: category?.name?.trim(),
+          type: "cat",
+        })
+      }
+      className="items-center space-y-2 mr-3"
+    >
       <View
         className={`p-4 rounded-xl items-center justify-center ${
           category?.name === "Fruits"

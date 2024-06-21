@@ -7,15 +7,14 @@ const CustomButton = ({
   containerStyles,
   textStyles,
   isLoading,
-  event,
+  value,
 }) => {
   return (
     <TouchableOpacity
       onPress={handlePress}
       activeOpacity={0.7}
-      className={`${
-        event ? "bg-[#511bb7]" : "bg-secondary-100"
-      } rounded-xl min-h-[62px] flex flex-row justify-center items-center ${containerStyles} ${
+      className={` bg-secondary-100 
+   rounded-xl min-h-[62px] flex flex-row justify-center items-center ${containerStyles} ${
         isLoading ? "opacity-50" : ""
       }`}
       disabled={isLoading}
@@ -25,8 +24,10 @@ const CustomButton = ({
       </Text>
 
       {title === "Cart" && (
-        <View className="ml-2">
+        <View className="ml-2 flex-row items-center space-x-1">
           <FontAwesome6 name="cart-plus" size={15} color={"#fff"} />
+
+          <Text className="text-white font-psemibold text-base">({value})</Text>
         </View>
       )}
 

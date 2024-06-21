@@ -18,10 +18,8 @@ export const config = {
   shopsCollectionId: "66730eb6002e9a18aec4",
   categoriesCollectionId: "6673123e00029f60a859",
   foodsCollectionId: "66731cf10000fc24c398",
-
-  statusCollectionId: "6666c69f00375daf2e8a",
-  eventcommentsCollectionId: "66618576002aa6d75458",
-  eventTicketCollectionId: "666195eb00332848e84f",
+  ordersCollectionId: "6674af04003dfa1724a2",
+  statusCollectionId: "6675ba260026e0223571",
   storageId: "66717d9f002c87fca304",
 };
 
@@ -152,7 +150,15 @@ export async function getDocBaseOnQuery(limit, collectionId, query, value) {
     const posts = await database.listDocuments(
       config.databaseId,
       collectionId,
-      [Query.orderDesc("rating"), Query.limit(limit), Query.equal(query, value)]
+      [
+        Query.orderDesc(query === "users" ? "$createdAt" : "rating"),
+        Query.limit(limit),
+        query === "shops" || query === "users"
+          ? Query.equal(query, value)
+          : query === "foodcat"
+          ? Query.contains(query, value)
+          : Query.search(query, value),
+      ]
     );
 
     return posts.documents;
@@ -162,19 +168,51 @@ export async function getDocBaseOnQuery(limit, collectionId, query, value) {
   }
 }
 
-export async function getAllUsers(limit) {
+// Create  Order
+export async function createDoc(form, collectionId) {
   try {
-    const posts = await database.listDocuments(
+    const postId = ID.unique();
+
+    const newPost = await database.createDocument(
       config.databaseId,
-      config.userCollectionId,
-      limit
-        ? [Query.orderDesc("$createdAt"), Query.limit(limit)]
-        : [Query.orderDesc("$createdAt")]
+      collectionId,
+      postId,
+      {
+        ...form,
+      }
     );
 
-    return posts.documents;
+    return newPost;
   } catch (error) {
-    console.log(error);
+    throw new Error(error);
+  }
+}
+
+// Sign Out
+export async function signOut() {
+  try {
+    const session = await account.deleteSession("current");
+
+    return session;
+  } catch (error) {
+    throw new Error(error);
+  }
+}
+
+// Update Post
+export async function updateDoc(form) {
+  try {
+    const { collectionId, documentId, ...updatedForm } = form;
+
+    const newPost = await database.updateDocument(
+      config.databaseId,
+      collectionId,
+      documentId,
+      updatedForm
+    );
+
+    return newPost;
+  } catch (error) {
     throw new Error(error);
   }
 }
@@ -191,135 +229,6 @@ export async function getAppStatus() {
   } catch (error) {
     console.log(error);
     throw new Error(error);
-  }
-}
-
-export async function searchUsers(attribute, query) {
-  try {
-    const posts = await database.listDocuments(
-      config.databaseId,
-      config.userCollectionId,
-      [Query.search(attribute, query)]
-    );
-
-    if (!posts) throw new Error("Something went wrong");
-
-    return posts.documents;
-  } catch (error) {
-    throw new Error(error.message);
-  }
-}
-
-// Get  posts that matches search query
-export async function searchPosts(query) {
-  try {
-    const posts = await database.listDocuments(
-      config.databaseId,
-      config.newsCollectionId,
-      [
-        Query.or([
-          Query.search("title", query),
-          Query.search("author", query),
-          Query.search("documentId", query),
-        ]),
-      ]
-    );
-
-    if (!posts) throw new Error("Something went wrong");
-
-    return posts.documents;
-  } catch (error) {
-    throw new Error(error.message);
-  }
-}
-
-// Get  posts that matches search query
-export async function searchEvents(query) {
-  try {
-    const events = await database.listDocuments(
-      config.databaseId,
-      config.eventsCollectionId,
-      [
-        Query.or([
-          Query.search("title", query),
-          Query.search("author", query),
-          Query.search("documentId", query),
-          Query.search("location", query),
-        ]),
-      ]
-    );
-
-    if (!events) throw new Error("Something went wrong");
-
-    return events.documents;
-  } catch (error) {
-    throw new Error(error.message);
-  }
-}
-
-// Get  event that matches search query
-export async function searchTicket(query, userId) {
-  if (query) {
-    try {
-      const events = await database.listDocuments(
-        config.databaseId,
-        config.eventTicketCollectionId,
-        userId
-          ? [Query.search("postId", query), Query.search("userId", userId)]
-          : [Query.search("postId", query)]
-      );
-
-      if (!events) throw new Error("Something went wrong");
-
-      return events.documents;
-    } catch (error) {
-      throw new Error(error.message);
-    }
-  }
-}
-
-// Get all trending posts
-export async function searchTrendingPosts() {
-  try {
-    const posts = await database.listDocuments(
-      config.databaseId,
-      config.eventsCollectionId,
-      [Query.equal("trending", true)]
-    );
-
-    if (!posts) throw new Error("Something went wrong");
-
-    return posts.documents;
-  } catch (error) {
-    throw new Error(error.message);
-  }
-}
-
-// Sign Out
-export async function signOut() {
-  try {
-    const session = await account.deleteSession("current");
-
-    return session;
-  } catch (error) {
-    throw new Error(error);
-  }
-}
-
-// Get  posts created by user
-export async function getUserPosts(userId, type) {
-  if (userId) {
-    try {
-      const posts = await database.listDocuments(
-        config.databaseId,
-        type === "event" ? config.eventsCollectionId : config.newsCollectionId,
-        [Query.equal("creator", userId)]
-      );
-
-      return posts.documents;
-    } catch (error) {
-      throw new Error(error);
-    }
   }
 }
 
@@ -393,41 +302,6 @@ export async function createVideoPost(form) {
         creator: form.creator,
         type: form.type,
         trending: form.trending,
-        documentId: postId,
-        likes: [],
-      }
-    );
-
-    return newPost;
-  } catch (error) {
-    throw new Error(error);
-  }
-}
-
-// Create  Event
-export async function createEventPost(form) {
-  try {
-    const [thumbnailUrl] = await Promise.all([uploadFile(form.image, "image")]);
-
-    const postId = ID.unique();
-
-    const newPost = await database.createDocument(
-      config.databaseId,
-      config.eventsCollectionId,
-      postId,
-      {
-        title: form.title,
-        image: thumbnailUrl,
-        author: form.author,
-        desc: form.desc,
-        date: form.date,
-        timee: form.time,
-        creator: form.creator,
-        options: form.options,
-        trending: form.trending,
-        entryFee: form.entryFee,
-        reservation: form.seat,
-        location: form.location,
         documentId: postId,
         likes: [],
       }

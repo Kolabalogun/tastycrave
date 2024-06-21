@@ -1,4 +1,4 @@
-import { View, Text, Image, ScrollView } from "react-native";
+import { View, Text, Image, ScrollView, ActivityIndicator } from "react-native";
 import React, { useEffect, useMemo, useState } from "react";
 import ScreenLayout from "../layout/screenlayout";
 import Header from "../components/common/navbar";
@@ -9,6 +9,7 @@ import Tab from "../components/restaurantMenu/tab";
 import { config, getDocBaseOnQuery } from "../lib/appwrite";
 import useAppwrite from "../lib/useAppwrite";
 import Card from "../components/restaurantMenu/foodcard";
+import EmptyState from "../components/common/emptyState";
 
 const RestaurantMenu = ({ route }) => {
   const navigation = useNavigation();
@@ -99,31 +100,46 @@ const RestaurantMenu = ({ route }) => {
                   </View>
                 </View>
                 <Text className="text-gray-400 font-pmedium text-xs">
-                  {shop?.dishes} Dishes
+                  {foods?.length || 0} Dishes
                 </Text>
               </View>
             </View>
           </View>
         </View>
 
-        <View className="my-5">
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {shop?.foodcat?.map((category) => (
-              <Tab
-                key={category}
-                category={category}
-                selectedCategory={selectedCategory}
-                setSelectedCategory={setSelectedCategory}
-              />
-            ))}
-          </ScrollView>
-        </View>
+        {loading ? (
+          <View className="h-64 items-center justify-center">
+            <ActivityIndicator color={"#FF9C01"} size="large" />
+          </View>
+        ) : (
+          <>
+            <View className="my-5">
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                {shop?.foodcat?.map((category) => (
+                  <Tab
+                    key={category}
+                    category={category}
+                    selectedCategory={selectedCategory}
+                    setSelectedCategory={setSelectedCategory}
+                  />
+                ))}
+              </ScrollView>
+            </View>
 
-        <View>
-          {filteredFoods?.map((food) => (
-            <Card food={food} key={food?.$id} />
-          ))}
-        </View>
+            {filteredFoods?.length === 0 ? (
+              <EmptyState
+                title="No Food found for this category"
+                subtitle="Search is Empty"
+              />
+            ) : (
+              <View>
+                {filteredFoods?.map((food) => (
+                  <Card food={food} key={food?.$id} />
+                ))}
+              </View>
+            )}
+          </>
+        )}
       </ScrollView>
     </ScreenLayout>
   );

@@ -22,7 +22,7 @@ export function timeAgo(publishedAt) {
   }
   interval = Math.floor(seconds / 60);
   if (interval >= 1) {
-    return interval + " minute" + (interval > 1 ? "s" : "") + " ago";
+    return interval + " min" + (interval > 1 ? "s" : "") + " ago";
   }
-  return Math.floor(seconds) + " second" + (seconds > 1 ? "s" : "") + " ago";
+  return Math.floor(seconds) + " sec" + (seconds > 1 ? "s" : "") + " ago";
 }

@@ -1,198 +1,187 @@
 import {
-  Image,
   ImageBackground,
-  Platform,
   SafeAreaView,
-  StatusBar,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
+  Dimensions,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useGlobalContext } from "../context/useGlobalContext";
-import RestaurantTopbar from "../components/restaurant/restaurantTopBar";
+
 import Header from "../components/common/navbar";
 import { images } from "../constants";
+import { AntDesign, FontAwesome6 } from "@expo/vector-icons";
+import CustomButton from "../components/common/custombutton";
+
+const { height } = Dimensions.get("window");
 
 const FoodDetails = ({ navigation, route }) => {
-  const { increment, currentFood, decrement, navAmount, total, showCart } =
-    useGlobalContext();
+  const { setCart, cart } = useGlobalContext();
 
   useEffect(() => {
     let { food } = route.params;
-    foodF(food);
-  });
+    setFood({ ...food, value: 0 });
+  }, [route.params]);
 
-  const [count, countF] = useState(0);
-  const [food, foodF] = useState(null);
+  const [food, setFood] = useState(null);
 
-  const [constt, consttF] = useState(null);
+  const IsFoodInCart = cart?.find((fd) => fd?.$id === food?.$id);
 
+  useEffect(() => {
+    IsFoodInCart && setFood(IsFoodInCart);
+  }, [cart, food]);
+
+  const handleIncrement = () => {
+    const updatedFood = { ...food, value: food.value + 1 };
+
+    setCart((prev) => {
+      const existingItemIndex = prev.findIndex((item) => item.$id === food.$id);
+      if (existingItemIndex > -1) {
+        const updatedCart = [...prev];
+        updatedCart[existingItemIndex] = updatedFood;
+        return updatedCart;
+      }
+      return [...prev, updatedFood];
+    });
+    setFood(updatedFood);
+  };
+
+  const handleDecrement = () => {
+    if (food?.value > 0) {
+      const updatedFood = { ...food, value: food.value - 1 };
+      setCart((prev) => {
+        const existingItemIndex = prev.findIndex(
+          (item) => item.$id === food.$id
+        );
+        if (existingItemIndex > -1) {
+          const updatedCart = [...prev];
+          if (updatedFood.value > 0) {
+            updatedCart[existingItemIndex] = updatedFood;
+          } else {
+            updatedCart.splice(existingItemIndex, 1);
+          }
+          return updatedCart;
+        }
+        return [...prev];
+      });
+      setFood(updatedFood);
+    }
+  };
   return (
-    <ScreenLayout>
-      <View>
-        <Header
-          title={"food name"}
-          fn={() => navigation.goBack()}
-          img={"back"}
-          img2={images.logoSmall}
-        />
-      </View>
+    <SafeAreaView className="flex-1 bg-primary h-full relative">
+      <ScrollView className="relative">
+        <View className="px-4">
+          <Header
+            title={food?.name}
+            fn={() => navigation.goBack()}
+            img={"back"}
+            img2={images.logoSmall}
+          />
+        </View>
 
-      <View style={{ flex: 2 }}>
-        <ImageBackground
-          source={{ uri: food?.photo }}
-          style={{ height: "100%" }}
-          resizeMode="cover"
-        >
-          <RestaurantTopbar navigation={navigation} />
-
-          {showCart && <Cart />}
-        </ImageBackground>
-      </View>
-      <View style={styles.foodBoard}>
-        <View style={styles.line}></View>
-        <View style={styles.NameandCount}>
-          <View style={styles.name}>
-            <Text style={styles.Foodname}>{food?.name}</Text>
-            <Text style={styles.FoodDes}>{food?.description}</Text>
-          </View>
-          <View style={styles.count}>
-            <TouchableOpacity
-              style={styles.countBtn}
-              onPress={() => {
-                decrement(food?.menuId);
-                if (constt > 0 || food?.value) {
-                  consttF(count - 1);
-                }
-              }}
-            >
-              <Text style={styles.countBtnTxt}>-</Text>
-            </TouchableOpacity>
-            <View style={styles.countBtn}>
-              <Text style={styles.countBtnTxt}>
-                {constt ? currentFood : food?.value}
-              </Text>
+        <View style={{ flex: 2, height: height * 0.5 }}>
+          <ImageBackground
+            source={{ uri: food?.image }}
+            style={styles.imageBackground}
+            resizeMode="cover"
+          ></ImageBackground>
+        </View>
+        <View style={styles.foodBoard} className="relative  flex-1 bg-black">
+          <View style={styles.line}></View>
+          <View className="justify-between flex-1 bg-white h-full">
+            <View className="mt-3 flex-row items-center">
+              <View
+                style={{ flex: 3 }}
+                className="flex-row items-center justify-between"
+              >
+                <Text className="font-psemibold text-xl ">{food?.name}</Text>
+              </View>
+              <View className="flex-row items-center space-x-3 bg-secondary-200 py-2 px-1 rounded-full">
+                <TouchableOpacity className="px-3 " onPress={handleDecrement}>
+                  <Text className="text-white font-psemibold text-xl">-</Text>
+                </TouchableOpacity>
+                <View className="  ">
+                  <Text className="text-white font-psemibold text-xl">
+                    {IsFoodInCart ? IsFoodInCart?.value : food?.value}
+                  </Text>
+                </View>
+                <TouchableOpacity onPress={handleIncrement} className="px-3 ">
+                  <Text className="text-white font-psemibold text-xl">+</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-            <TouchableOpacity
-              onPress={() => {
-                increment(food?.menuId);
 
-                consttF(count + 1);
-              }}
-              style={styles.countBtn}
-            >
-              <Text style={styles.countBtnTxt}>+</Text>
-            </TouchableOpacity>
+            <View className="flex-row space-x-0.5 mt-3  items-center justify-between">
+              <View className="flex-row space-x-0.5 mt-3  items-center">
+                <FontAwesome6 name="naira-sign" size={14} color="black" />
+                <Text className="font-pmedium text-[16px] mt-0.5">
+                  {food?.price}
+                </Text>
+              </View>
+              <View className="items-center flex-row gap-x-1">
+                <AntDesign name="star" size={12} color="#FF9C01" />
+                <Text className="text-gray-400 uppercase font-psemibold text-sm">
+                  {food?.rating}
+                </Text>
+              </View>
+            </View>
+
+            <Text className="text-gray-400 uppercase font-psemibold text-sm">
+              {food?.shops?.name}
+            </Text>
+
+            <View className="mt-6">
+              <Text className="font-plight  ">{food?.desc}</Text>
+            </View>
           </View>
         </View>
-        <View style={styles.checkout}>
-          <View style={styles.cartDetail}>
-            <Text style={styles.cartDetailTxt}>{navAmount} foods in Cart</Text>
-            <Text style={styles.cartDetailTxt}>$ {total}</Text>
-          </View>
-          <View style={styles.cartDetail}>
-            <Text style={styles.cartDetailTxt}>Tasty Food</Text>
-            <Text style={styles.cartDetailTxt}>768494040</Text>
-          </View>
-          <TouchableOpacity
-            onPress={() => {
-              navigation.navigate("Checkout", {
-                food,
-                currentLocation,
-              });
-            }}
-            style={styles.checkoutBtn}
-          >
-            <Text style={styles.checkoutBtnTxt}>Order</Text>
-          </TouchableOpacity>
+      </ScrollView>
+      {food?.value > 0 && (
+        <View style={styles.buttonContainer}>
+          <CustomButton
+            title="Cart"
+            value={cart?.length}
+            handlePress={() => navigation.navigate("Cart")}
+            containerStyles="mt-7"
+          />
         </View>
-      </View>
-    </ScreenLayout>
+      )}
+    </SafeAreaView>
   );
 };
 
 export default FoodDetails;
 
 const styles = StyleSheet.create({
+  imageBackground: {
+    height: "100%",
+    width: "100%",
+  },
   foodBoard: {
-    borderTopLeftRadius: 15,
-    borderTopRightRadius: 15,
+    borderTopLeftRadius: 35,
+    borderTopRightRadius: 35,
     backgroundColor: "white",
     paddingHorizontal: 20,
-    marginTop: -16,
+    marginTop: -36,
     paddingBottom: 10,
+    marginBottom: 140,
   },
   line: {
     borderRadius: 5,
-    borderColor: "green",
-
+    borderColor: "#FF9C01",
     borderWidth: 2,
     width: 90,
-
     alignSelf: "center",
     marginVertical: 10,
   },
-
-  NameandCount: {
-    flexDirection: "row",
-
-    alignItems: "center",
-  },
-
-  name: {
-    flex: 3,
-    marginRight: 20,
-  },
-  Foodname: {
-    fontSize: 30,
-    fontWeight: "500",
-  },
-
-  count: {
-    flexDirection: "row",
-    backgroundColor: "green",
-    padding: 5,
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "space-between",
-    borderRadius: 15,
-  },
-  countBtn: {
-    flexDirection: "row",
-    backgroundColor: "green",
-    paddingHorizontal: 5,
-  },
-  countBtnTxt: {
-    fontSize: 25,
-    fontWeight: "500",
-    color: "white",
-  },
-  checkout: {
-    marginTop: 35,
-  },
-  cartDetail: {
-    borderTopWidth: 1,
-    borderColor: "rgb(182, 192, 199)",
-    paddingVertical: 10,
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  cartDetailTxt: {
-    fontSize: 16,
-    fontWeight: "500",
-  },
-  checkoutBtn: {
-    backgroundColor: "green",
-    alignItems: "center",
-    borderRadius: 10,
-    marginVertical: 10,
-  },
-  checkoutBtnTxt: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: "white",
-    padding: 10,
+  buttonContainer: {
+    position: "absolute",
+    bottom: 0,
+    width: "100%",
+    paddingHorizontal: 20,
+    paddingBottom: 20,
   },
 });
