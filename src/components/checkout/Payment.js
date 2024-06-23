@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, Alert } from "react-native";
+import { View, Text, TouchableOpacity, Alert, Linking } from "react-native";
 import React, { useState } from "react";
 import {
   AntDesign,
@@ -8,13 +8,12 @@ import {
   MaterialIcons,
 } from "@expo/vector-icons";
 import { useGlobalContext } from "../../context/useGlobalContext";
-
 import CustomButton from "../common/custombutton";
 import { config, createDoc } from "../../lib/appwrite";
 import { sendPushNotification } from "../../lib/notification";
 
 const Payment = ({ setTab, address, phoneNumber, addDesc }) => {
-  const { cart: carts, setCart, user } = useGlobalContext();
+  const { cart: carts, setCart, user, adminExpoIDs } = useGlobalContext();
 
   const [loading, setLoading] = useState(false);
 
@@ -39,24 +38,40 @@ const Payment = ({ setTab, address, phoneNumber, addDesc }) => {
         users: user?.$id,
         phone: phoneNumber,
         addressDesc: addDesc,
+        status: false,
       };
-      await createDoc(updatedForm, config.ordersCollectionId);
+      const res = await createDoc(updatedForm, config.ordersCollectionId);
 
-      setCart([]);
-      setTab("Success");
+      console.log(res, "res");
 
-      const message = {
-        title: "🎉 New Order Alert!",
-        body: "Your order has been placed and is speeding its way to you! 🚐✨",
-      };
+      if (res.item) {
+        setCart([]);
+        setTab("Success");
 
-      await sendPushNotification([user?.expo_Id], message);
+        const message = {
+          title: "🎉 New Order Alert!",
+          body: "Your order has been placed and is speeding its way to you! 🚐✨",
+        };
+
+        const adminMessage = {
+          title: `🎉 New Order Alert! from ${user?.username}`,
+        };
+
+        await sendPushNotification([user?.expo_Id], message);
+
+        await sendPushNotification(adminExpoIDs, adminMessage);
+      }
     } catch (error) {
       console.log(error);
       Alert.alert("Error", "Error while processing order. Please try again");
     } finally {
       setLoading(false);
     }
+  };
+  const handleContactAdmin = async () => {
+    const url = "https://wa.me/2348086295102";
+
+    await Linking.openURL(url);
   };
 
   return (
@@ -102,6 +117,29 @@ const Payment = ({ setTab, address, phoneNumber, addDesc }) => {
               Payment through Card is curretly not available 😔
             </Text>
           </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={handleContactAdmin}
+          className="flex-row items-center   bg-white w-full   p-4   rounded-xl border-[1px]  border-[#b4b4b4] focus:border-secondary-100"
+        >
+          <View className="mr-3">
+            <MaterialIcons name="payments" size={18} color="#49c77f" />
+          </View>
+
+          <View className="flex-1">
+            <Text className="text-sm text-black-100   font-pmedium">
+              Transfer
+            </Text>
+
+            <Text className="text-xs mt-1 text-gray-500   font-pregular">
+              You can make a payment via bank transfer. Please click here to
+              contact our payment customer care. Thank you!
+            </Text>
+          </View>
+          {/* <View className="ml-3">
+            <AntDesign name="checkcircle" size={18} color="#49c77f" />
+          </View> */}
         </TouchableOpacity>
 
         <TouchableOpacity className="flex-row items-center   bg-white w-full   p-4   rounded-xl border-[1px]  border-[#b4b4b4] focus:border-secondary-100">

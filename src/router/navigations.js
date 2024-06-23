@@ -18,6 +18,12 @@ import { ActivityIndicator, Platform, SafeAreaView } from "react-native";
 import { useEffect, useRef, useState } from "react";
 import { config, getAllDocs } from "../lib/appwrite";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Restaurants from "../screens/restaurants";
+import Notification from "../screens/notification";
+import Contact from "../screens/contact";
+import Help from "../screens/help";
+import Foods from "../screens/foods";
+import Onboarding from "../screens/onboarding";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -202,6 +208,7 @@ const Navigations = () => {
     >
       {!user ? (
         <>
+          <Stack.Screen name="Onboarding" component={Onboarding} />
           <Stack.Screen name="Login" component={Login} />
 
           <Stack.Screen name="Register" component={Register} />
@@ -221,6 +228,15 @@ const Navigations = () => {
           <Stack.Screen name="Users" component={Users} />
           <Stack.Screen name="CreateRestaurant" component={CreateRestaurant} />
           <Stack.Screen name="CreateFood" component={CreateFood} />
+
+          <Stack.Screen name="Restaurants" component={Restaurants} />
+          <Stack.Screen name="Foods" component={Foods} />
+
+          <Stack.Screen name="Notification" component={Notification} />
+
+          <Stack.Screen name="Contact" component={Contact} />
+
+          <Stack.Screen name="Help" component={Help} />
         </>
       )}
     </Stack.Navigator>

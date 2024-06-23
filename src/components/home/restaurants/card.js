@@ -5,6 +5,17 @@ import { useNavigation } from "@react-navigation/native";
 
 const ShopCard = ({ shop }) => {
   const navigation = useNavigation();
+
+  const rating = Math.floor(shop?.rating);
+
+  const renderStars = () => {
+    const stars = [];
+    for (let i = 0; i < rating; i++) {
+      stars.push(<AntDesign key={i} name="star" size={12} color="#FF9C01" />);
+    }
+    return stars;
+  };
+
   return (
     <View className="mt-4">
       <TouchableOpacity
@@ -13,29 +24,26 @@ const ShopCard = ({ shop }) => {
             shop,
           });
         }}
-        className="flex flex-row   justify-between     "
+        className="flex flex-row justify-between"
       >
         <View>
           <Image
             source={{ uri: shop?.image }}
-            className=" w-24 h-16 rounded-md mb-5 overflow-hidden shadow-lg shadow-black/40 mr-4"
+            className="w-24 h-16 rounded-md mb-5 overflow-hidden shadow-lg shadow-black/40 mr-4"
             resizeMode="cover"
           />
         </View>
         <View className="flex-1 justify-between">
-          <Text
-            className="text-black-200 font-pmedium text-base
-      "
-          >
+          <Text className="text-black-200 font-pmedium text-base">
             {shop?.name}
           </Text>
 
-          <View className=" mb-6   flex-row justify-between items-center">
+          <View className="mb-6 flex-row justify-between items-center">
             <View className="items-center flex-row gap-x-1">
               <View className="items-center flex-row gap-x-1">
-                <AntDesign name="star" size={12} color="#FF9C01" />
+                {renderStars()}
                 <Text className="text-gray-400 uppercase font-psemibold text-xs">
-                  {shop?.rating}
+                  {rating}
                 </Text>
               </View>
             </View>
@@ -45,7 +53,7 @@ const ShopCard = ({ shop }) => {
           </View>
         </View>
       </TouchableOpacity>
-      <View className="h-[0.5px]   bg-gray-500 mx-3 my-2 "></View>
+      <View className="h-[0.5px] bg-gray-500 mx-3 my-2"></View>
     </View>
   );
 };

@@ -1,15 +1,18 @@
-import { View, Text, ScrollView, TextInput } from "react-native";
+import { View, Text, ScrollView, TextInput, Alert } from "react-native";
 import { TouchableOpacity } from "react-native";
 import { Image } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import FormField from "../common/formfield";
 import { icons } from "../../constants";
 import CustomButton from "../common/custombutton";
-import { config, getAllDocs } from "../../lib/appwrite";
+import { config, deletePost, getAllDocs } from "../../lib/appwrite";
 import useAppwrite from "../../lib/useAppwrite";
 import { FontAwesome6 } from "@expo/vector-icons";
+import { useState } from "react";
+import { useNavigation } from "@react-navigation/native";
 
-const UploadFood = ({ form, openPicker, setForm, submit, uploading }) => {
+const UploadFood = ({ form, openPicker, setForm, submit, uploading, food }) => {
+  const navigation = useNavigation();
   const { data: categories, loading } = useAppwrite(() =>
     getAllDocs(null, config.categoriesCollectionId)
   );
@@ -17,6 +20,25 @@ const UploadFood = ({ form, openPicker, setForm, submit, uploading }) => {
   const { data: shops } = useAppwrite(() =>
     getAllDocs(null, config.shopsCollectionId)
   );
+
+  const [loader, setLoader] = useState(false);
+
+  const handleDelete = async () => {
+    setLoader(true);
+    try {
+      await deletePost({
+        collectionId: food.$collectionId,
+        documentId: food.$id,
+      });
+
+      Alert.alert("Success", "Food deleted successfully");
+      navigation.goBack();
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoader(false);
+    }
+  };
 
   return (
     <View className="  mb-3">
@@ -36,7 +58,7 @@ const UploadFood = ({ form, openPicker, setForm, submit, uploading }) => {
         <TouchableOpacity onPress={() => openPicker()}>
           {form.image ? (
             <Image
-              source={{ uri: form.image.uri }}
+              source={{ uri: form.image.uri || form.image }}
               resizeMode="cover"
               className="w-full h-64 rounded-2xl"
             />
@@ -178,6 +200,15 @@ const UploadFood = ({ form, openPicker, setForm, submit, uploading }) => {
         containerStyles="mt-7"
         isLoading={uploading}
       />
+
+      {food && (
+        <CustomButton
+          title="Delete Food"
+          handlePress={handleDelete}
+          containerStyles="mt-7"
+          isLoading={loader}
+        />
+      )}
     </View>
   );
 };

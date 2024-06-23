@@ -10,15 +10,21 @@ import {
 } from "react-native";
 import React, { useState } from "react";
 import ScreenLayout from "../layout/screenlayout";
-import { images } from "../constants";
+import { icons, images } from "../constants";
 import { useGlobalContext } from "../context/useGlobalContext";
 import InfoBox from "../components/common/profile/infoBox";
 import { useNavigation } from "@react-navigation/native";
-import { config, getDocBaseOnQuery, signOut } from "../lib/appwrite";
+import { config, getDocBaseOnQuery, signOut, updateDoc } from "../lib/appwrite";
 import useAppwrite from "../lib/useAppwrite";
-import { FontAwesome5, FontAwesome6, MaterialIcons } from "@expo/vector-icons";
+import {
+  Entypo,
+  FontAwesome5,
+  FontAwesome6,
+  MaterialIcons,
+} from "@expo/vector-icons";
 
 import RecentOrders from "../components/profile/recentOrders";
+import Menu from "../components/profile/menu";
 
 const Profile = () => {
   const { user, setUser, setIsLoggedIn, storeData, checkCurrentUser } =
@@ -32,7 +38,7 @@ const Profile = () => {
     refetch,
     loading: ordersLoading,
   } = useAppwrite(() =>
-    getDocBaseOnQuery(20, config.ordersCollectionId, "users", user?.$id)
+    getDocBaseOnQuery(220, config.ordersCollectionId, "users", user?.$id)
   );
 
   const onRefresh = async () => {
@@ -46,6 +52,12 @@ const Profile = () => {
   const logout = async () => {
     setLoading(true);
     try {
+      const removeUserExpoId = {
+        expo_Id: null,
+        collectionId: user?.$collectionId,
+        documentId: user?.$id,
+      };
+      await updateDoc(removeUserExpoId);
       await signOut();
       setUser(null);
       setIsLoggedIn(false);
@@ -72,7 +84,7 @@ const Profile = () => {
               <Image resizeMode="contain" style={{ height: 24, width: 24 }} />
             </TouchableOpacity>
             <View>
-              <Text className="text-black-200 text-lg font-pmedium capitalize">
+              <Text className="text-black-220 text-lg font-pmedium capitalize">
                 User Profile
               </Text>
               <View className="w-4 self-center   bg-secondary h-[2px]"></View>
@@ -84,23 +96,23 @@ const Profile = () => {
                 </View>
               ) : (
                 <TouchableOpacity
-                  onLongPress={logout}
+                  onPress={logout}
                   className="flex w-full items-end "
                 >
                   <Image
-                    source={images.logoSmall}
+                    source={icons.logout}
                     resizeMode="contain"
-                    className="w-8 h-8"
+                    className="w-6 h-6"
                   />
                 </TouchableOpacity>
               )}
             </View>
           </View>
           <View className="items-center">
-            <View className="w-16 h-16 border border-secondary rounded-lg flex justify-center items-center">
+            <View className="w-16 h-16 border border-secondary rounded-full flex justify-center items-center">
               <Image
                 source={{ uri: user?.avatar }}
-                className="w-[90%] h-[90%] rounded-lg"
+                className="w-[90%] h-[90%] rounded-full"
                 resizeMode="cover"
               />
             </View>
@@ -130,85 +142,127 @@ const Profile = () => {
             </View>
           </View>
 
-          {user?.role === "admin" && (
-            <View>
-              <View className="my-5">
-                <Text className=" py-1 border-b-black-200 border-b-[1px] text-black uppercase text-xs font-psemibold">
-                  SETTINGS
-                </Text>
+          <View>
+            <View className="my-5">
+              <Text className=" py-1 border-b-black-220 border-b-[1px] text-black uppercase text-xs font-psemibold">
+                SETTINGS
+              </Text>
 
-                <TouchableOpacity
-                  onPress={() => navigation.navigate("Orders")}
-                  className="justify-between py-1 border-b-black-200 border-b-[1px]  flex-row items-center"
-                >
-                  <View>
-                    <Text className=" py-4 text-black flex-col  capitalize text-sm font-pmedium">
-                      All Orders
-                    </Text>
-                  </View>
-
-                  <View>
-                    <MaterialIcons
-                      name={"shopping-cart-checkout"}
-                      size={20}
-                      color={"#FF9C01"}
+              <>
+                {user?.role === "admin" ? (
+                  <>
+                    <Menu
+                      handlePress={() => navigation.navigate("Orders")}
+                      icon={
+                        <MaterialIcons
+                          name={"shopping-cart-checkout"}
+                          size={22}
+                          color={"#FF9C01"}
+                        />
+                      }
+                      title={"All Orders"}
                     />
-                  </View>
-                </TouchableOpacity>
 
-                <TouchableOpacity
-                  onPress={() => navigation.navigate("Users")}
-                  className="justify-between py-1 border-b-black-200 border-b-[1px]  flex-row items-center"
-                >
-                  <View>
-                    <Text className=" py-4 text-black flex-col  capitalize text-sm font-pmedium">
-                      All Users
-                    </Text>
-                  </View>
-
-                  <View>
-                    <FontAwesome5 name="users" size={20} color="#FF9C01" />
-                  </View>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  onPress={() => navigation.navigate("CreateRestaurant")}
-                  className="justify-between py-1 border-b-black-200 border-b-[1px]  flex-row items-center"
-                >
-                  <View>
-                    <Text className=" py-4 text-black flex-col  capitalize text-sm font-pmedium">
-                      Create Restaurant
-                    </Text>
-                  </View>
-
-                  <View>
-                    <FontAwesome6
-                      name="house-chimney-medical"
-                      size={20}
-                      color="#FF9C01"
+                    <Menu
+                      handlePress={() => navigation.navigate("Users")}
+                      icon={
+                        <FontAwesome5 name="users" size={22} color="#FF9C01" />
+                      }
+                      title={"All Users"}
                     />
-                  </View>
-                </TouchableOpacity>
 
-                <TouchableOpacity
-                  onPress={() => navigation.navigate("CreateFood")}
-                  className="justify-between py-1 border-b-black-200 border-b-[1px]  flex-row items-center"
-                >
-                  <View>
-                    <Text className=" py-4 text-black flex-col  capitalize text-sm font-pmedium">
-                      Create Food
-                    </Text>
-                  </View>
+                    <Menu
+                      handlePress={() => navigation.navigate("Restaurants")}
+                      icon={
+                        <MaterialIcons
+                          name="home-work"
+                          size={22}
+                          color="#FF9C01"
+                        />
+                      }
+                      title={"All Restaurants"}
+                    />
 
-                  <View>
-                    <MaterialIcons name="fastfood" size={20} color="#FF9C01" />
-                  </View>
-                </TouchableOpacity>
-              </View>
+                    <Menu
+                      handlePress={() => navigation.navigate("Foods")}
+                      icon={
+                        <Entypo
+                          name="shopping-basket"
+                          size={22}
+                          color="#FF9C01"
+                        />
+                      }
+                      title={"All Foods"}
+                    />
+
+                    <Menu
+                      handlePress={() =>
+                        navigation.navigate("CreateRestaurant")
+                      }
+                      icon={
+                        <FontAwesome6
+                          name="house-chimney-medical"
+                          size={22}
+                          color="#FF9C01"
+                        />
+                      }
+                      title={"Create Restaurant"}
+                    />
+
+                    <Menu
+                      handlePress={() => navigation.navigate("CreateFood")}
+                      icon={
+                        <MaterialIcons
+                          name="fastfood"
+                          size={22}
+                          color="#FF9C01"
+                        />
+                      }
+                      title={" Create Food"}
+                    />
+
+                    <Menu
+                      handlePress={() => navigation.navigate("Notification")}
+                      icon={
+                        <MaterialIcons
+                          name="notifications-active"
+                          size={22}
+                          color="#FF9C01"
+                        />
+                      }
+                      title={"Notification"}
+                    />
+
+                    <Menu
+                      handlePress={() => navigation.navigate("Help")}
+                      icon={
+                        <Entypo
+                          name="help-with-circle"
+                          size={22}
+                          color="#FF9C01"
+                        />
+                      }
+                      title={"Help"}
+                    />
+                  </>
+                ) : (
+                  <Menu
+                    handlePress={() => navigation.navigate("Contact")}
+                    icon={
+                      <MaterialIcons
+                        name={"message"}
+                        size={22}
+                        color={"#FF9C01"}
+                      />
+                    }
+                    title={"Contact Us"}
+                  />
+                )}
+              </>
             </View>
-          )}
+          </View>
 
-          <View className="w-full     bg-gray-300 h-[1px] mb-5"></View>
+          {/* <View className="w-full     bg-gray-300 h-[1px] mb-5"></View> */}
 
           <RecentOrders loading={ordersLoading} orders={orders} />
         </View>

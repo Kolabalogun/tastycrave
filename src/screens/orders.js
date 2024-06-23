@@ -11,25 +11,26 @@ import {
 import React, { useEffect, useMemo, useState } from "react";
 import ScreenLayout from "../layout/screenlayout";
 import useAppwrite from "../lib/useAppwrite";
-import { config, getAllDocs, updateDoc } from "../lib/appwrite";
+import { config, deletePost, getAllDocs, updateDoc } from "../lib/appwrite";
 
 import EmptyState from "../components/common/emptyState";
 import { FontAwesome6, MaterialIcons } from "@expo/vector-icons";
 import { timeAgo } from "../utils/timeAgo";
 import OrderTab from "../components/orders/tab";
 import { sendPushNotification } from "../lib/notification";
+import { useGlobalContext } from "../context/useGlobalContext";
 
 const Orders = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState("pending");
 
+  const { adminExpoIDs } = useGlobalContext();
+
   const {
     data: orders,
     refetch,
     loading,
-  } = useAppwrite(() => getAllDocs(30, config.ordersCollectionId));
-
-  console.log(orders[0]);
+  } = useAppwrite(() => getAllDocs(100, config.ordersCollectionId));
 
   const filteredOrders = useMemo(() => {
     if (!orders) return [];
@@ -69,11 +70,18 @@ const Orders = () => {
         body: "Your order has been delivered. Enjoy your meal! 🍽️",
       };
 
+      const adminmessage = {
+        title: "🍽️ Order Delivered!",
+        body: `${order?.users?.username}'s order has been delivered`,
+      };
+
       await sendPushNotification(
         [order?.users?.expo_Id],
         order?.status ? message : successmessage
       );
 
+      !order?.status &&
+        (await sendPushNotification(adminExpoIDs, adminmessage));
       refetch();
     } catch (error) {
       console.log(error);
@@ -86,6 +94,25 @@ const Orders = () => {
     await refetch();
 
     setRefreshing(false);
+  };
+
+  const [loader, setLoader] = useState(false);
+
+  const handleDelete = async (order) => {
+    setLoader(true);
+    try {
+      await deletePost({
+        collectionId: order.$collectionId,
+        documentId: order.$id,
+      });
+
+      // Alert.alert("Success", "Food deleted successfully");
+      // navigation.goBack();
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoader(false);
+    }
   };
 
   return (
@@ -208,6 +235,15 @@ const Orders = () => {
                           disabled={loading}
                         />
                       </View>
+
+                      <TouchableOpacity
+                        onPress={() => handleDelete(order)}
+                        className="bg-red-500 p-2 rounded-full w-32 items-center justify-center"
+                      >
+                        <Text className="text-white font-pmedium text-xs">
+                          {loader ? "loading.." : "Delete Order"}
+                        </Text>
+                      </TouchableOpacity>
                     </TouchableOpacity>
                   ))}
                 </View>

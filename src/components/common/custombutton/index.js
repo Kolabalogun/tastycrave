@@ -13,7 +13,9 @@ const CustomButton = ({
     <TouchableOpacity
       onPress={handlePress}
       activeOpacity={0.7}
-      className={` bg-secondary-100 
+      className={` ${
+        title.includes("Delete") ? "bg-red-500" : "bg-secondary-100 "
+      }
    rounded-xl min-h-[62px] flex flex-row justify-center items-center ${containerStyles} ${
         isLoading ? "opacity-50" : ""
       }`}

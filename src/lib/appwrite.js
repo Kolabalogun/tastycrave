@@ -20,6 +20,7 @@ export const config = {
   foodsCollectionId: "66731cf10000fc24c398",
   ordersCollectionId: "6674af04003dfa1724a2",
   statusCollectionId: "6675ba260026e0223571",
+  helpCollectionId: "66776e3200007e18d4f6",
   storageId: "66717d9f002c87fca304",
 };
 
@@ -151,7 +152,7 @@ export async function getDocBaseOnQuery(limit, collectionId, query, value) {
       config.databaseId,
       collectionId,
       [
-        Query.orderDesc(query === "users" ? "$createdAt" : "rating"),
+        Query.orderDesc("$createdAt"),
         Query.limit(limit),
         query === "shops" || query === "users"
           ? Query.equal(query, value)

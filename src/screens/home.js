@@ -1,18 +1,18 @@
-import { RefreshControl, ScrollView, View } from "react-native";
-import React, { useState } from "react";
+import { Alert, RefreshControl, ScrollView, View } from "react-native";
+import React, { useEffect, useState } from "react";
 import AdsBoard from "../components/home/adsboard";
 import FoodCategory from "../components/home/foodcategories";
 import ScreenLayout from "../layout/screenlayout";
 import SearchInput from "../components/common/searchInput";
 import Header from "../components/home/header";
 import Restaurants from "../components/home/restaurants";
-import { config, getAllDocs } from "../lib/appwrite";
+import { config, getAllDocs, updateDoc } from "../lib/appwrite";
 import useAppwrite from "../lib/useAppwrite";
 import { useGlobalContext } from "../context/useGlobalContext";
 import Loader from "../components/common/loader";
 
 const Home = () => {
-  const { checkCurrentUser } = useGlobalContext();
+  const { checkCurrentUser, user, expoPushToken } = useGlobalContext();
   const [refreshing, setRefreshing] = useState(false);
 
   const {
@@ -25,7 +25,7 @@ const Home = () => {
     data: shops,
     refetch: shopsRefetch,
     loading: shopsLoading,
-  } = useAppwrite(() => getAllDocs(20, config.shopsCollectionId));
+  } = useAppwrite(() => getAllDocs(30, config.shopsCollectionId));
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -34,6 +34,24 @@ const Home = () => {
     checkCurrentUser();
     setRefreshing(false);
   };
+
+  useEffect(() => {
+    const checkIfUserHasExpoID = async () => {
+      const form = {
+        collectionId: user?.$collectionId,
+        documentId: user?.$id,
+        expo_Id: expoPushToken,
+      };
+
+      if (user?.expo_Id === null || user?.expo_Id === "") {
+        await updateDoc(form);
+
+        // Alert.alert("User Expo ID has been updated");
+      }
+    };
+
+    checkIfUserHasExpoID();
+  }, []);
 
   if (loading || shopsLoading) return <Loader />;
 

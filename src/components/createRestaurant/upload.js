@@ -1,20 +1,42 @@
-import { View, Text, ScrollView } from "react-native";
+import { View, Text, ScrollView, Alert } from "react-native";
 import { TouchableOpacity } from "react-native";
 import { Image } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import FormField from "../common/formfield";
 import { icons } from "../../constants";
 import CustomButton from "../common/custombutton";
-import { config, getAllDocs } from "../../lib/appwrite";
+import { config, deletePost, getAllDocs } from "../../lib/appwrite";
 import useAppwrite from "../../lib/useAppwrite";
 import { FontAwesome6 } from "@expo/vector-icons";
+import { useState } from "react";
+import { useNavigation } from "@react-navigation/native";
 
-const UploadShop = ({ form, openPicker, setForm, submit, uploading }) => {
+const UploadShop = ({ form, openPicker, setForm, submit, uploading, shop }) => {
+  const navigation = useNavigation();
   const {
     data: categories,
 
     loading,
   } = useAppwrite(() => getAllDocs(null, config.categoriesCollectionId));
+
+  const [loader, setLoader] = useState(false);
+
+  const handleDelete = async () => {
+    setLoader(true);
+    try {
+      await deletePost({
+        collectionId: shop.$collectionId,
+        documentId: shop.$id,
+      });
+
+      Alert.alert("Success", "Shop deleted successfully");
+      navigation.goBack();
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoader(false);
+    }
+  };
 
   return (
     <View className="  mb-3">
@@ -34,7 +56,7 @@ const UploadShop = ({ form, openPicker, setForm, submit, uploading }) => {
         <TouchableOpacity onPress={() => openPicker()}>
           {form.image ? (
             <Image
-              source={{ uri: form.image.uri }}
+              source={{ uri: form.image.uri || form.image }}
               resizeMode="cover"
               className="w-full h-64 rounded-2xl"
             />
@@ -64,7 +86,7 @@ const UploadShop = ({ form, openPicker, setForm, submit, uploading }) => {
 
       <FormField
         title="Rating"
-        value={form.rating}
+        value={String(form.rating)}
         keyboardType="number-pad"
         placeholder="Rate the restaurant..."
         handleChangeText={(e) => setForm({ ...form, rating: e })}
@@ -138,6 +160,15 @@ const UploadShop = ({ form, openPicker, setForm, submit, uploading }) => {
         containerStyles="mt-7"
         isLoading={uploading}
       />
+
+      {shop && (
+        <CustomButton
+          title="Delete Restaurant"
+          handlePress={handleDelete}
+          containerStyles="mt-7"
+          isLoading={loader}
+        />
+      )}
     </View>
   );
 };

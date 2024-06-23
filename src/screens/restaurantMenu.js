@@ -1,4 +1,11 @@
-import { View, Text, Image, ScrollView, ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  ScrollView,
+  ActivityIndicator,
+  TouchableOpacity,
+} from "react-native";
 import React, { useEffect, useMemo, useState } from "react";
 import ScreenLayout from "../layout/screenlayout";
 import Header from "../components/common/navbar";
@@ -10,11 +17,14 @@ import { config, getDocBaseOnQuery } from "../lib/appwrite";
 import useAppwrite from "../lib/useAppwrite";
 import Card from "../components/restaurantMenu/foodcard";
 import EmptyState from "../components/common/emptyState";
+import { useGlobalContext } from "../context/useGlobalContext";
 
 const RestaurantMenu = ({ route }) => {
   const navigation = useNavigation();
 
-  const { shop } = route.params;
+  const { user } = useGlobalContext();
+
+  const { shop } = route?.params || {};
 
   const {
     data: foods,
@@ -28,7 +38,17 @@ const RestaurantMenu = ({ route }) => {
 
   useEffect(() => {
     setSelectedCategory(shop?.foodcat[0]);
-  }, [shop]);
+  }, [route?.params]);
+
+  const rating = Math.floor(shop?.rating);
+
+  const renderStars = () => {
+    const stars = [];
+    for (let i = 0; i < rating; i++) {
+      stars.push(<AntDesign key={i} name="star" size={12} color="#FF9C01" />);
+    }
+    return stars;
+  };
 
   const filteredFoods = useMemo(() => {
     if (!foods) return [];
@@ -90,12 +110,23 @@ const RestaurantMenu = ({ route }) => {
                 </Text>
               </View>
 
+              {user?.role === "admin" && (
+                <TouchableOpacity
+                  onPress={() => navigation.navigate("CreateFood")}
+                  className="bg-secondary-100 p-1 rounded-full w-20 items-center justify-center"
+                >
+                  <Text className="text-white font-pmedium text-xs">
+                    Add Food
+                  </Text>
+                </TouchableOpacity>
+              )}
+
               <View className=" mb-6   flex-row justify-between items-center">
                 <View className="items-center flex-row gap-x-1">
                   <View className="items-center flex-row gap-x-1">
-                    <AntDesign name="star" size={12} color="#FF9C01" />
+                    {renderStars()}
                     <Text className="text-gray-400 uppercase font-psemibold text-xs">
-                      {shop?.rating}
+                      {rating}
                     </Text>
                   </View>
                 </View>

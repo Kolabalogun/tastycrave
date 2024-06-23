@@ -39,7 +39,7 @@ const Search = ({ route }) => {
     loading: shoploading,
   } = useAppwrite(
     type === "restaurants"
-      ? () => getAllDocs(10, config.shopsCollectionId)
+      ? () => getAllDocs(30, config.shopsCollectionId)
       : () =>
           getDocBaseOnQuery(
             20,

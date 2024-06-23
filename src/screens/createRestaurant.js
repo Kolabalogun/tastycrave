@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { Alert, ScrollView, View } from "react-native";
 import * as ImagePicker from "expo-image-picker";
@@ -9,7 +9,7 @@ import UploadShop from "../components/createRestaurant/upload";
 
 import Header from "../components/common/navbar";
 import { images } from "../constants";
-import { config, createDoc, uploadFile } from "../lib/appwrite";
+import { config, createDoc, updateDoc, uploadFile } from "../lib/appwrite";
 
 const initialState = {
   name: "",
@@ -19,12 +19,18 @@ const initialState = {
   foodcat: [],
 };
 
-const CreateRestaurant = () => {
+const CreateRestaurant = ({ route }) => {
   const navigation = useNavigation();
+
+  const { shop } = route?.params || {};
 
   const [uploading, setUploading] = useState(false);
 
   const [form, setForm] = useState(initialState);
+
+  useEffect(() => {
+    if (shop) setForm(shop);
+  }, [route?.params]);
 
   const { name, image, location, rating, foodcat } = form;
 
@@ -49,6 +55,53 @@ const CreateRestaurant = () => {
     }
   };
 
+  const update = async () => {
+    if (!name || !image || !location || foodcat?.length === 0 || !rating) {
+      return Alert.alert("Error", "Please provide all fields");
+    }
+
+    setUploading(true);
+
+    let thumbnailUrl = form.image;
+
+    // Check if the image is a URL
+    const isUrl = (string) => {
+      try {
+        new URL(string);
+        return true;
+      } catch (_) {
+        return false;
+      }
+    };
+
+    if (!isUrl(form.image)) {
+      [thumbnailUrl] = await Promise.all([uploadFile(form.image, "image")]);
+    }
+
+    try {
+      const updatedForm = {
+        name,
+        rating: parseFloat(form.rating),
+        image: thumbnailUrl,
+        location,
+        foodcat,
+        collectionId: shop?.$collectionId,
+        documentId: shop?.$id,
+      };
+
+      await updateDoc(updatedForm);
+
+      Alert.alert("Success", "Shop updated successfully");
+
+      navigation.goBack();
+    } catch (error) {
+      Alert.alert("Error", error.message);
+      console.log(error);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const submit = async () => {
     if (!name || !image || !location || foodcat.length === 0 || !rating) {
       return Alert.alert("Error", "Please provide all fields");
@@ -70,7 +123,7 @@ const CreateRestaurant = () => {
 
       navigation.navigate("Home");
     } catch (error) {
-      Alert.alert("Error", "Unable to upload post");
+      Alert.alert("Error", error.message);
       console.log(error);
     } finally {
       setForm(initialState);
@@ -83,7 +136,7 @@ const CreateRestaurant = () => {
     <ScreenLayout>
       <View>
         <Header
-          title={"Create Restaurant"}
+          title={shop ? "Edit Restaurant" : "Create Restaurant"}
           fn={() => navigation.goBack()}
           img={"back"}
           img2={images.logoSmall}
@@ -91,11 +144,12 @@ const CreateRestaurant = () => {
       </View>
       <ScrollView showsVerticalScrollIndicator={false}>
         <UploadShop
+          shop={shop}
           form={form}
           openPicker={openPicker}
           setForm={setForm}
           uploading={uploading}
-          submit={submit}
+          submit={shop ? update : submit}
         />
       </ScrollView>
     </ScreenLayout>

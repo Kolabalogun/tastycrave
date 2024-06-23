@@ -22,9 +22,9 @@ const FoodDetails = ({ navigation, route }) => {
   const { setCart, cart } = useGlobalContext();
 
   useEffect(() => {
-    let { food } = route.params;
+    let { food } = route?.params || {};
     setFood({ ...food, value: 0 });
-  }, [route.params]);
+  }, [route?.params]);
 
   const [food, setFood] = useState(null);
 

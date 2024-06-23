@@ -20,11 +20,11 @@ const Header = () => {
 
       <TouchableOpacity
         onPress={() => navigation.navigate("Profile")}
-        className="w-10 h-10 border border-secondary-200 rounded-lg flex justify-center items-center"
+        className="w-10 h-10 border border-secondary-200 rounded-full flex justify-center items-center"
       >
         <Image
           source={{ uri: user?.avatar }}
-          className="w-[85%] h-[85%] rounded-lg"
+          className="w-[85%] h-[85%] rounded-full"
           resizeMode="cover"
         />
       </TouchableOpacity>

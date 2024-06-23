@@ -2,7 +2,12 @@ import React, { useContext, useEffect, useState } from "react";
 
 import useAppwrite from "../lib/useAppwrite";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { config, getAllDocs, getCurrentUser } from "../lib/appwrite";
+import {
+  config,
+  getAllDocs,
+  getCurrentUser,
+  getDocBaseOnQuery,
+} from "../lib/appwrite";
 
 const AppContext = React.createContext();
 
@@ -14,11 +19,40 @@ const AppProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const [adminExpoIDs, setAdminExpoIDs] = useState([]);
+
   const [updateUser, setUpdateUser] = useState(true);
 
   const { data: users, loading } = useAppwrite(() =>
-    getAllDocs(40, config.userCollectionId)
+    getAllDocs(100, config.userCollectionId)
   );
+
+  const usersWithRoleAdmin = async () => {
+    setIsLoading(true);
+    try {
+      const res = await getDocBaseOnQuery(
+        100,
+        config.userCollectionId,
+        "role",
+        "admin"
+      );
+
+      if (res.length > 0) {
+        const filtredRes = res
+          ?.filter((user) => user.expo_Id)
+          .map((user) => user.expo_Id);
+
+        // Remove duplicates using a Set and convert back to array
+        const uniqueExpoIds = Array.from(new Set(filtredRes));
+
+        setAdminExpoIDs(uniqueExpoIds);
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     const getExpoIDs = () => {
@@ -32,7 +66,9 @@ const AppProvider = ({ children }) => {
         setAllExpoPushToken(uniqueExpoIds);
       }
     };
+
     getExpoIDs();
+    usersWithRoleAdmin();
   }, [users, loading]);
 
   // Define the function to check the current user
@@ -90,6 +126,7 @@ const AppProvider = ({ children }) => {
         setUser,
         storeData,
         isLoading,
+        adminExpoIDs,
       }}
     >
       {children}

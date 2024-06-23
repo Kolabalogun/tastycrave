@@ -105,16 +105,18 @@ const Checkout = () => {
             />
           ) : (
             <View>
-              <View className="    min-h-[70vh] w-full items-center p-4 rounded-lg bg-white">
-                <Image
-                  source={images.success}
-                  resizeMode="cover"
-                  className="h-72 w-full"
-                />
+              <View className="     min-h-[80vh] w-full justify-center items-center p-4 rounded-lg bg-white">
+                <View className=" ">
+                  <Image
+                    source={images.success}
+                    resizeMode="cover"
+                    className="h-64 w-64"
+                  />
+                </View>
                 <View className="my-4 ">
                   <Text className="text-3xl text-center font-pregular text-black-100 ">
                     <Text className="  text-secondary-100 ">Yay! 🙌 </Text>
-                    your Order has been success
+                    Your order has been successfully placed!
                   </Text>
 
                   <Text className=" mt-2 text-center text-sm font-pregular  text-gray-400 ">
